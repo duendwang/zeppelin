@@ -1,4 +1,3 @@
-version: '3'
 name: zeppelin-prod
 volumes:
   mysql-data:
@@ -10,8 +9,10 @@ services:
       MYSQL_DATABASE: zeppelin
       MYSQL_USER: zeppelin
       MYSQL_PASSWORD: ${STANDALONE_MYSQL_PASSWORD?:Missing STANDALONE_MYSQL_PASSWORD}
-    ports:
-      - 127.0.0.1:${STANDALONE_MYSQL_PORT:?Missing STANDALONE_MYSQL_PORT}:3306
+    expose:
+      - ${STANDALONE_MYSQL_PORT:-:3306}
+    #ports:
+    #  - 127.0.0.1:${STANDALONE_MYSQL_PORT:?Missing STANDALONE_MYSQL_PORT}:3306
     # If you're upgrading from an older version, you can load your old database by switching the volumes below.
     # Then, take a database dump from the old database, switch the volumes back, and load the dump into the new database.
     volumes:
@@ -28,8 +29,41 @@ services:
     build:
       context: .
       dockerfile: docker/production/nginx/Dockerfile
-    ports:
-      - "${STANDALONE_WEB_PORT:?Missing STANDALONE_WEB_PORT}:80"
+    expose:
+      - "${STANDALONE_WEB_PORT:-80}"
+    #ports:
+    #  - "${STANDALONE_WEB_PORT:?Missing STANDALONE_WEB_PORT}:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zeppelin.entrypoints=websecure"
+      - "traefik.http.routers.zeppelin.rule=Host(`$DOMAIN`)"
+      - "traefik.http.routers.zeppelin.tls.certresolver=http-challenge"
+    networks:
+      - network
+      - traefik-proxy
+
+  phpmyadmin:
+    depends_on:
+      - mysql
+    image: phpmyadmin:latest
+    restart: unless-stopped
+    expose:
+      - "80"
+      #- "443"
+    environment:
+      PMA_HOST: mysql
+      PMA_ABSOLUTE_URI: https://${DOMAIN:?Missing DOMAIN}/phpmyadmin/
+      MYSQL_ROOT_PASSWORD: ${STANDALONE_MYSQL_ROOT_PASSWORD?:Missing STANDALONE_MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: zeppelin
+      MYSQL_PASSWORD: ${STANDALONE_MYSQL_PASSWORD?:Missing STANDALONE_MYSQL_PASSWORD}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zeppelin-phpmyadmin.entrypoints=websecure"
+      - "traefik.http.routers.zeppelin-phpmyadmin.rule=Host(`$DOMAIN`) and Path(`/phpmyadmin`)"
+      - "traefik.http.routers.zeppelin-phpmyadmin.tls.certresolver=http-challenge"
+    networks:
+      - network
+      - traefik-proxy
 
   migrate:
     depends_on:
@@ -88,3 +122,7 @@ services:
       - .env
     working_dir: /zeppelin/dashboard
     command: ["node", "serve.js"]
+networks:
+  network:
+  traefik-proxy:
+    external: true
