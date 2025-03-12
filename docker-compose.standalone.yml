@@ -59,7 +59,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.zeppelin-phpmyadmin.entrypoints=websecure"
-      - "traefik.http.routers.zeppelin-phpmyadmin.rule=Host(`$DOMAIN`) and Path(`/phpmyadmin`)"
+      - "traefik.http.routers.zeppelin-phpmyadmin.rule=Host(`$DOMAIN`) and PathPrefix(`/phpmyadmin`)"
       - "traefik.http.routers.zeppelin-phpmyadmin.tls.certresolver=http-challenge"
     networks:
       - network
