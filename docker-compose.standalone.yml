@@ -6,7 +6,7 @@ services:
     image: mysql:8.0
     security_opt:
       - "no-new-privileges:true"
-    cap-drop:
+    cap_drop:
       - SETUID
       - SETGID
     environment:
@@ -36,7 +36,7 @@ services:
       dockerfile: docker/production/nginx/Dockerfile
     security_opt:
       - "no-new-privileges:true"
-    cap-drop:
+    cap_drop:
       - SETUID
       - SETGID
     expose:
@@ -59,7 +59,7 @@ services:
     restart: unless-stopped
     security_opt:
       - "no-new-privileges:true"
-    cap-drop:
+    cap_drop:
       - SETUID
       - SETGID
     expose:
@@ -91,7 +91,7 @@ services:
         API_URL:
     security_opt:
       - "no-new-privileges:true"
-    cap-drop:
+    cap_drop:
       - SETUID
       - SETGID
     environment: &env
@@ -115,7 +115,7 @@ services:
     restart: on-failure
     security_opt:
       - "no-new-privileges:true"
-    cap-drop:
+    cap_drop:
       - SETUID
       - SETGID
     environment: *env
@@ -132,7 +132,7 @@ services:
     restart: on-failure
     security_opt:
       - "no-new-privileges:true"
-    cap-drop:
+    cap_drop:
       - SETUID
       - SETGID
     environment: *env
@@ -149,7 +149,7 @@ services:
     restart: on-failure
     security_opt:
       - "no-new-privileges:true"
-    cap-drop:
+    cap_drop:
       - SETUID
       - SETGID
     environment: *env
